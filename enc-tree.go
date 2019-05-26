@@ -56,9 +56,10 @@ type parseTreeDataFunc func(root Data) error
  *
  * The workhorse of encoding the data in the tree is the encoding/gob function in golang.
  *
- * The data is encoded in a binary format (similar to a TLV format). Since the encoding is primarily used
- * to send network traffic this will make it better if we have to send the encoded file between different
- * architectures
+ * The data is encoded in a binary format (similar to a TLV format).
+ *
+ * The encoded file should be portable between different architectures (big endian and little endian).
+ * Havent tested that functionality yet
  *
  */
 
@@ -248,6 +249,7 @@ func CompareTrees(tree1 *Node, tree2 *Node) bool {
 	return true
 }
 
+// Read a file and return an array of Data present in the file
 func DecodeFile(f *os.File) []Data {
 	dec := gob.NewDecoder(f)
 	outputDataSlice := make([]Data, 0)
@@ -262,6 +264,7 @@ func DecodeFile(f *os.File) []Data {
 	return outputDataSlice
 }
 
+// Encode a tree into a file
 func EncodeIntoFile(f *os.File, root *Node) {
 	encFn := encodeTreeFunc(f)
 	processTree(encFn, root)
