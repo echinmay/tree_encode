@@ -19,17 +19,13 @@ import (
  *
  */
 
-/*
- * The Data struct will carry the data
- */
+// Data : An example struct will carry the data
 type Data struct {
 	Key int
 	Val string
 }
 
-/*
- * The Tree data structure
- */
+// Node The Tree data structure
 type Node struct {
 	D     Data
 	Left  *Node
@@ -110,7 +106,7 @@ func addtotree(root *Node, d Data) *Node {
 		return newn
 	}
 
-	var parent *Node = root
+	parent := root
 
 	for {
 		if d.Key < parent.D.Key {
@@ -194,9 +190,9 @@ func getPreOrderDataVals(pptr **[]Data) parseTreeDataFunc {
 	}
 }
 
-// Function to construct a tree given an array of Data values
+// MakeTree : Function to construct a tree given an array of Data values
 func MakeTree(darr []Data) *Node {
-	var root *Node = nil
+	var root *Node
 	if darr == nil {
 		return root
 	}
@@ -206,7 +202,7 @@ func MakeTree(darr []Data) *Node {
 	return root
 }
 
-// Helper function to compare two trees
+// CompareTrees : Helper function to compare two trees
 func CompareTrees(tree1 *Node, tree2 *Node) bool {
 	if tree1 == nil {
 		if tree2 == nil {
@@ -249,8 +245,8 @@ func CompareTrees(tree1 *Node, tree2 *Node) bool {
 	return true
 }
 
-// Read a file and return an array of Data present in the file
-func DecodeFile(f *os.File) []Data {
+// DecodeFile : Read a file and return an array of Data present in the file
+func DecodeFile2(f *os.File) []Data {
 	dec := gob.NewDecoder(f)
 	outputDataSlice := make([]Data, 0)
 	for {
@@ -264,10 +260,35 @@ func DecodeFile(f *os.File) []Data {
 	return outputDataSlice
 }
 
-// Encode a tree into a file
-func EncodeIntoFile(f *os.File, root *Node) {
+// DecodeFile2 : Read a file and return an array of Data present in the file
+func DecodeFile(f *os.File) []Data {
+	dec := gob.NewDecoder(f)
+	var d []Data
+	err := dec.Decode(&d)
+	if err != nil {
+		log.Fatal("...")
+	}
+	return d
+}
+
+// EncodeIntoFile : Encode a tree into a file
+func EncodeIntoFile2(f *os.File, root *Node) {
 	encFn := encodeTreeFunc(f)
 	processTree(encFn, root)
+}
+
+// EncodeIntoFile2 : A different way of encoding the tree
+func EncodeIntoFile(f *os.File, root *Node) {
+	var data1 *[]Data
+	collectDatafn := getPreOrderDataVals(&data1)
+	processTree(collectDatafn, root)
+	enc := gob.NewEncoder(f)
+	dataArr := *data1
+	err := enc.Encode(dataArr)
+	if err != nil {
+		log.Fatal("Error encoding the data array ")
+	}
+
 }
 
 // This example shows the basic usage of the package: Create an encoder,

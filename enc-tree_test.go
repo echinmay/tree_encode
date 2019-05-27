@@ -147,3 +147,34 @@ func TestVeryDeepTrees(t *testing.T) {
 		t.Errorf("Even big trees should be correctly encoded")
 	}
 }
+
+func TestVeryVeryDeepTrees(t *testing.T) {
+	entries := make([]int, 0)
+	for idx := 0; idx < 100000; idx++ {
+		entries = append(entries, idx)
+	}
+
+	data := make([]Data, 0)
+	for idx := 0; idx < len(entries); idx++ {
+		s := strconv.Itoa(entries[idx])
+		data = append(data, Data{entries[idx], s})
+	}
+	tree := MakeTree(data)
+	f, err := os.Create("/tmp/testing-verybig-file-1")
+	if err != nil {
+		fmt.Println("Error creating file")
+	}
+	EncodeIntoFile(f, tree)
+	f.Close()
+	f1, err1 := os.Open("/tmp/testing-verybig-file-1")
+	if err1 != nil {
+		fmt.Println("Error creating file")
+	}
+	data2 := DecodeFile(f1)
+	tree2 := MakeTree(data2)
+	f1.Close()
+	cmp := CompareTrees(tree, tree2)
+	if cmp != true {
+		t.Errorf("Even big trees should be correctly encoded")
+	}
+}
