@@ -271,35 +271,57 @@ func EncodeIntoFile(f *os.File, root *Node) {
 }
 
 // This example shows the basic usage of the package: Create an encoder,
-// transmit some values, receive them with a decoder.
+// save the tree to a local file and then decode it and reconstruct the tree
 func main() {
-	// Initialize the encoder and decoder. Normally enc and dec would be
-	// bound to network connections and the encoder and decoder would
-	// run in different processes.
+
+	if len(os.Args) != 2 {
+		fmt.Println(" Usage : ", os.Args[0], " <Name to file to encode in>")
+		return
+	}
+
+	// Get a list of keys to insert
 	var entries = [10]int{10, 7, 4, 1, 5, 9, 17, 15, 20, 30}
+
+	// Prepare the data
 	data := make([]Data, 0)
 	for idx := 0; idx < len(entries); idx++ {
 		s := strconv.Itoa(entries[idx])
 		data = append(data, Data{entries[idx], s})
 	}
+
+	// Create the file in which the tree will be encoded
 	f, e := os.Create(os.Args[1])
 	if e != nil {
 		log.Fatal("Could not create a file to store the tree in")
 		return
 	}
+
+	// Make the tree from the data
 	root := MakeTree(data)
+
+	// Encode it into the file
 	EncodeIntoFile(f, root)
+
+	// Close the file
 	f.Close()
 
+	// Re-open the file
 	f2, err2 := os.Open(os.Args[1])
 	if err2 != nil {
 		log.Fatal("Could not read the file back for reading")
 		return
 	}
+
+	// Get the data encoded in the file
 	outputDataSlice := DecodeFile(f2)
 	defer f2.Close()
+
+	// Recreate the tree
 	newRoot := MakeTree(outputDataSlice)
 
+	// Compare the original and new tree
 	same := CompareTrees(root, newRoot)
+
+	// Print the result
 	fmt.Println(same)
 }
